@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "dataloader"
 version = "0.1.0"
 description = "A thread-safe data loader for ClickHouse."
+authors = [{name="Deen Radoncic", email="deenr214@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.13.0"
 dependencies = [
@@ -30,3 +31,6 @@ target-version = ["py313"]
 
 [tool.pylint]
 max-line-length = 88
+
+[tool.setuptools.packages.find]
+where = ["dataloader"]

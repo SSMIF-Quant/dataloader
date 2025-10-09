@@ -100,7 +100,8 @@ class DataLoader:
             selected_cols.extend(columns_list)
 
         if column_pattern:
-            selected_cols.append(f"COLUMNS('{column_pattern})")
+            for p in column_pattern:
+                selected_cols.append(f"COLUMNS('{p})")
 
         return ", ".join(selected_cols)
 
