@@ -85,7 +85,7 @@ class DataLoader:
         offset: Optional[int] = None,
     ) -> str:
 
-        symbols = filters.get("symbols", []) if filters else []
+        symbols = filters.get("symbol", []) if filters else []
         select_expr = cls._resolve_columns(
             source, symbols, columns_list, column_pattern
         )
