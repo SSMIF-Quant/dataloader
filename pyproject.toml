@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "dataloader"
 version = "0.1.0"
 description = "A thread-safe data loader for ClickHouse."
-authors = [{name="Deen Radoncic", email="deenr214@gmail.com"}]
+authors = [{name="SSMIF", email="ssmifquant@gmail.com"}]
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.13.0"
 dependencies = [
