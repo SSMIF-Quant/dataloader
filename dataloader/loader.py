@@ -53,9 +53,24 @@ class DataLoader:
                     params[key] = value
 
         df = cls.client.query(query, params)
+        return cls._format_dataframe(df, source, filters)
 
-        df["date"] = pd.to_datetime(df["date"])
-        df = df.rename(columns={"date": "Date"})
+
+    @staticmethod
+    def _format_dataframe(
+        df: pd.DataFrame, source: str, filters: Optional[Dict[str, Any]] = None
+    ) -> pd.DataFrame:
+        """
+        Standardizes and cleans ClickHouse query output.
+        Handles:
+          - datetime conversion
+          - sorting & deduplication
+          - renaming columns (for single-symbol equities)
+          - setting Date as index
+        """
+        if "date" in df.columns:
+            df["date"] = pd.to_datetime(df["date"])
+            df = df.rename(columns={"date": "Date"})
 
         if "symbol" in df.columns:
             df = df.sort_values(["symbol", "Date"]).drop_duplicates(
@@ -66,9 +81,13 @@ class DataLoader:
 
         df.set_index("Date", inplace=True)
 
-        if filters and source == "equities" and len(filters.get("symbol", [])) == 1:
-            symbol = filters["symbol"][0]
-            df = cls._rename_columns(symbol, df)
+        if filters and source == "equities" and "symbol" in filters:
+            symbols = filters["symbol"]
+            if isinstance(symbols, str):
+                symbols = [symbols]
+            if len(symbols) == 1:
+                symbol = symbols[0]
+                df = df.rename(columns=lambda col: f"{symbol}_{col}")
 
         return df
 
@@ -130,7 +149,12 @@ class DataLoader:
         """
         selected_cols: list[str] = ["date"]
 
-        if source == "equities" and len(symbols or []) > 1:
+        if symbols is None:
+            symbols = []
+        elif isinstance(symbols, str):
+            symbols = [symbols]
+
+        if source == "equities" and len(symbols) > 1:
             selected_cols.append("symbol")
 
         if columns_list:
