@@ -117,10 +117,9 @@ from dataloader import DataLoader
 # Get data for multiple symbols with limit
 multi_symbol_data = DataLoader.get_data(
     source="equities",
-    columns_list=["close", "volume", "market_cap"],
+    columns_list=["PX_LAST", "CUR_MKT_CAP", "PX_VOLUME"],
     filters={
-        "symbol": ["AAPL", "GOOGL", "MSFT"],  # Multiple values
-        "exchange": "NASDAQ"
+        "symbol": ["AAPL", "GOOGL", "MSFT"]
     },
     limit=1000
 )

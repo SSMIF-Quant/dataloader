@@ -55,7 +55,6 @@ class DataLoader:
         df = cls.client.query(query, params)
         return cls._format_dataframe(df, source, filters)
 
-
     @staticmethod
     def _format_dataframe(
         df: pd.DataFrame, source: str, filters: Optional[Dict[str, Any]] = None
@@ -124,12 +123,13 @@ class DataLoader:
                 else:
                     query += f" AND {key} = %({key})s"
 
-        if limit:
-            query += f" LIMIT {limit}"
-        if offset:
-            query += f" OFFSET {offset}"
-
         query += " ORDER BY date"
+
+        if limit:
+            if offset:
+                query += f" LIMIT {offset}, {limit}"
+            else:
+                query += f" LIMIT {limit}"
 
         return query
 
