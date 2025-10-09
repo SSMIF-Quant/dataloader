@@ -152,7 +152,7 @@ from dataloader import DataLoader
 # Mix explicit columns and patterns
 combined_data = DataLoader.get_data(
     source="equities",
-    columns_list=["symbol", "close", "volume"],  # Explicit columns
+    columns_list=["PX_LAST"],  # Explicit columns
     column_pattern=["IS_*", "BS_*"],  # Income Statement + Balance Sheet columns
     filters={"symbol": "TSLA"}
 )
@@ -168,7 +168,7 @@ from dataloader import DataLoader
 # Get data in chunks
 page_1 = DataLoader.get_data(
     source="equities",
-    columns_list=["close"],
+    columns_list=["PX_LAST"],
     filters={"symbol": "AAPL"},
     limit=100,
     offset=0
@@ -176,7 +176,7 @@ page_1 = DataLoader.get_data(
 
 page_2 = DataLoader.get_data(
     source="equities",
-    columns_list=["close"],
+    columns_list=["PX_LAST"],
     filters={"symbol": "AAPL"},
     limit=100,
     offset=100
@@ -205,6 +205,8 @@ All queries return a `pandas.DataFrame` with:
 ## Notes
 
 - The `date` column is automatically included in all queries
+- The `symbol` column is included when filtering by multiple symbols
+- The columns are renamed for clarity when filtering by a single symbol
 - Dates are converted to pandas datetime objects
 - Results are always sorted by date
 - The default database is `ssmif_quant`
