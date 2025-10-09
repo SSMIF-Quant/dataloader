@@ -1,6 +1,6 @@
 """Clickhouse data loader"""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, ClassVar
 
 import pandas as pd
 from attrs import define
@@ -20,11 +20,12 @@ class DataLoader:
         - table/view aliasing
     """
 
-    database: str = "ssmif_quant"
-    client: Client = Manager.get_connection()
+    database: ClassVar[str] = "ssmif_quant"
+    client: ClassVar[Client] = Manager.get_connection()
 
+    @classmethod
     def get_data(
-        self,
+        cls,
         source: str,
         columns_list: Optional[List[str]] = None,
         column_pattern: Optional[List[str]] = None,
@@ -39,7 +40,7 @@ class DataLoader:
             1. view (materialized)
             2. base table
         """
-        query = self._build_query(
+        query = cls._build_query(
             source, columns_list, column_pattern, filters, limit, offset
         )
 
@@ -51,10 +52,19 @@ class DataLoader:
                 else:
                     params[key] = value
 
-        return self.client.query(query, params)
+        df = cls.client.query(query, params)
 
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.rename(columns={"date": "Date"})
+
+        df = df.sort_values("Date").drop_duplicates(subset=["Date"])
+        df.set_index("Date", inplace=True)
+
+        return df
+
+    @classmethod
     def _build_query(
-        self,
+        cls,
         source: str,
         columns_list: Optional[List[str]] = None,
         column_pattern: Optional[List[str]] = None,
@@ -63,7 +73,7 @@ class DataLoader:
         offset: Optional[int] = None,
     ) -> str:
 
-        select_expr = self._resolve_columns(columns_list, column_pattern)
+        select_expr = cls._resolve_columns(columns_list, column_pattern)
         query = f"SELECT {select_expr} FROM {source} WHERE 1=1"
 
         if filters:
@@ -82,8 +92,8 @@ class DataLoader:
 
         return query
 
+    @staticmethod
     def _resolve_columns(
-        self,
         columns_list: Optional[List[str]] = None,
         column_pattern: Optional[List[str]] = None,
     ) -> str:
@@ -105,18 +115,20 @@ class DataLoader:
 
         return ", ".join(selected_cols)
 
-    def show_tables(self) -> List[str]:
+    @classmethod
+    def show_tables(cls) -> List[str]:
         """
         Returns available tables.
         """
-        query = f"SHOW TABLES FROM {self.database}"
-        df = self.client.query(query)
+        query = f"SHOW TABLES FROM {cls.database}"
+        df = cls.client.query(query)
         return df["name"].tolist()
 
-    def show_table_column(self, source: str) -> List[str]:
+    @classmethod
+    def show_table_column(cls, source: str) -> List[str]:
         """
         Returns all columns for a given table.
         """
-        query = f"SHOW COLUMNS FROM {self.database}.{source}"
-        df = self.client.query(query)
+        query = f"SHOW COLUMNS FROM {cls.database}.{source}"
+        df = cls.client.query(query)
         return df["field"].tolist()
