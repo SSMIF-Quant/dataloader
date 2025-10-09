@@ -56,7 +56,8 @@ class Client:
         try:
             with self.pool.get_client() as client:
                 result = client.query("SELECT 1")
-                return bool(result and result[0][0] == 1)
+                rows = result.result_rows
+                return bool(rows and rows[0][0] == 1)
         except (  # pylint: disable=W0718
             Exception,
             DatabaseError,
