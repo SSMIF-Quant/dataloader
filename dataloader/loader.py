@@ -60,6 +60,18 @@ class DataLoader:
         df = df.sort_values("Date").drop_duplicates(subset=["Date"])
         df.set_index("Date", inplace=True)
 
+        if filters and source == "equities" and len(filters.get("symbol", [])) == 1:
+            symbol = filters["symbol"][0]
+            df = cls._rename_columns(symbol, df)
+
+        return df
+
+    @staticmethod
+    def _rename_columns(symbol: str, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Renames columns to a standard format.
+        """
+        df = df.rename(columns=lambda col: f"{symbol}_{col}")
         return df
 
     @classmethod
@@ -73,7 +85,11 @@ class DataLoader:
         offset: Optional[int] = None,
     ) -> str:
 
-        select_expr = cls._resolve_columns(columns_list, column_pattern)
+        symbols = filters.get("symbols", []) if filters else []
+        select_expr = cls._resolve_columns(
+            source, symbols, columns_list, column_pattern
+        )
+
         query = f"SELECT {select_expr} FROM {source} WHERE 1=1"
 
         if filters:
@@ -94,6 +110,8 @@ class DataLoader:
 
     @staticmethod
     def _resolve_columns(
+        source: str,
+        symbols: Optional[List[str]] = None,
         columns_list: Optional[List[str]] = None,
         column_pattern: Optional[List[str]] = None,
     ) -> str:
@@ -105,6 +123,9 @@ class DataLoader:
         Returns a Clickhouse SELECT expression.
         """
         selected_cols: list[str] = ["date"]
+
+        if source == "equities" and len(symbols or []) > 1:
+            selected_cols.append("symbol")
 
         if columns_list:
             selected_cols.extend(columns_list)
