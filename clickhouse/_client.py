@@ -23,6 +23,7 @@ class Client:
     def __attrs_post_init__(self) -> None:
         """Connects to ClickHouse."""
         self._connect()
+        self.health()
 
     def _connect(self) -> None:
         """Establishes a connection to ClickHouse."""
@@ -69,4 +70,4 @@ class Client:
         if not self.pool:
             raise RuntimeError("ClickHouse pool not available")
         with self.pool.get_client() as client:
-            return client.query(sql, params)
+            return client.query_df(sql, params)

@@ -16,7 +16,7 @@ class Manager:
     _lock: ClassVar[threading.RLock] = threading.RLock()
 
     @classmethod
-    def get_clickhouse(cls) -> Client:
+    def get_connection(cls) -> Client:
         """
         Returns a thread-safe singleton instance of the DataLoader client for
         ClickHouse.
