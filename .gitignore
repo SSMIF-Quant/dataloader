@@ -10,3 +10,9 @@ test.py
 dataloader.egg-info 
 
 __pycache__
+
+.eggs
+
+build
+
+dist
