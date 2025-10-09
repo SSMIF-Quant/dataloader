@@ -57,7 +57,11 @@ class DataLoader:
         df["date"] = pd.to_datetime(df["date"])
         df = df.rename(columns={"date": "Date"})
 
-        df = df.sort_values("Date").drop_duplicates(subset=["Date"])
+        if "symbol" in df.columns:
+            df = df.sort_values(["symbol", "Date"]).drop_duplicates(subset=["symbol", "Date"])
+        else:
+            df = df.sort_values("Date").drop_duplicates(subset=["Date"])
+
         df.set_index("Date", inplace=True)
 
         if filters and source == "equities" and len(filters.get("symbol", [])) == 1:
