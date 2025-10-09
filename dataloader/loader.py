@@ -58,7 +58,9 @@ class DataLoader:
         df = df.rename(columns={"date": "Date"})
 
         if "symbol" in df.columns:
-            df = df.sort_values(["symbol", "Date"]).drop_duplicates(subset=["symbol", "Date"])
+            df = df.sort_values(["symbol", "Date"]).drop_duplicates(
+                subset=["symbol", "Date"]
+            )
         else:
             df = df.sort_values("Date").drop_duplicates(subset=["Date"])
 
