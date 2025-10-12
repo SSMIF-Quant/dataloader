@@ -53,19 +53,17 @@ class DataLoader:
                     params[key] = value
 
         df = cls.client.query(query, params)
-        return cls._format_dataframe(df, source, filters)
+        return cls._format_dataframe(df)
 
     @staticmethod
-    def _format_dataframe(
-        df: pd.DataFrame, source: str, filters: Optional[Dict[str, Any]] = None
-    ) -> pd.DataFrame:
+    def _format_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         """
         Standardizes and cleans ClickHouse query output.
         Handles:
-          - datetime conversion
-          - sorting & deduplication
-          - renaming columns (for single-symbol equities)
-          - setting Date as index
+        - datetime conversion
+        - sorting & deduplication
+        - renaming columns (for single or multiple symbols)
+        - setting Date as index
         """
         if "date" in df.columns:
             df["date"] = pd.to_datetime(df["date"])
@@ -75,18 +73,21 @@ class DataLoader:
             df = df.sort_values(["symbol", "Date"]).drop_duplicates(
                 subset=["symbol", "Date"]
             )
+            df.set_index("Date", inplace=True)
+
+            renamed_frames = []
+            for sym, group in df.groupby("symbol"):
+                group = group.drop(columns="symbol")
+                group = group.rename(
+                    columns=lambda c: f"{sym}_{c}" if c != "Date" else c
+                )  # pylint: disable=W0640
+                renamed_frames.append(group)
+
+            df = pd.concat(renamed_frames, axis=1).sort_index()
+
         else:
             df = df.sort_values("Date").drop_duplicates(subset=["Date"])
-
-        df.set_index("Date", inplace=True)
-
-        if filters and source == "equities" and "symbol" in filters:
-            symbols = filters["symbol"]
-            if isinstance(symbols, str):
-                symbols = [symbols]
-            if len(symbols) == 1:
-                symbol = symbols[0]
-                df = df.rename(columns=lambda col: f"{symbol}_{col}")
+            df.set_index("Date", inplace=True)
 
         return df
 
@@ -108,11 +109,7 @@ class DataLoader:
         limit: Optional[int] = None,
         offset: Optional[int] = None,
     ) -> str:
-
-        symbols = filters.get("symbol", []) if filters else []
-        select_expr = cls._resolve_columns(
-            source, symbols, columns_list, column_pattern
-        )
+        select_expr = cls._resolve_columns(source, columns_list, column_pattern)
 
         query = f"SELECT {select_expr} FROM {source} WHERE 1=1"
 
@@ -136,7 +133,6 @@ class DataLoader:
     @staticmethod
     def _resolve_columns(
         source: str,
-        symbols: Optional[List[str]] = None,
         columns_list: Optional[List[str]] = None,
         column_pattern: Optional[List[str]] = None,
     ) -> str:
@@ -149,12 +145,7 @@ class DataLoader:
         """
         selected_cols: list[str] = ["date"]
 
-        if symbols is None:
-            symbols = []
-        elif isinstance(symbols, str):
-            symbols = [symbols]
-
-        if source == "equities" and len(symbols) > 1:
+        if source == "equities":
             selected_cols.append("symbol")
 
         if columns_list:
