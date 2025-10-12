@@ -121,10 +121,11 @@ class DataLoader:
                     query += f" AND date >= %({key})s"
                 elif key == "end":
                     query += f" AND date <= %({key})s"
-                if isinstance(value, list):
-                    query += f" AND {key} IN %({key})s"
                 else:
-                    query += f" AND {key} = %({key})s"
+                    if isinstance(value, list):
+                        query += f" AND {key} IN %({key})s"
+                    else:
+                        query += f" AND {key} = %({key})s"
 
         query += " ORDER BY date"
 
