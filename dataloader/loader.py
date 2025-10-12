@@ -79,8 +79,8 @@ class DataLoader:
             for sym, group in df.groupby("symbol"):
                 group = group.drop(columns="symbol")
                 group = group.rename(
-                    columns=lambda c: f"{sym}_{c}" if c != "Date" else c
-                )  # pylint: disable=W0640
+                    columns=lambda c: f"{sym}_{c}" if c != "Date" else c    # pylint: disable=W0640
+                )
                 renamed_frames.append(group)
 
             df = pd.concat(renamed_frames, axis=1).sort_index()
