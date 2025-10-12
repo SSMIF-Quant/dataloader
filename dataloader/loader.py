@@ -47,6 +47,10 @@ class DataLoader:
         params = {}
         if filters:
             for key, value in filters.items():
+                if key == "start":
+                    query += f" AND date >= %({key})s"
+                elif key == "end":
+                    query += f" AND date <= %({key})s"
                 if isinstance(value, list):
                     params[key] = tuple(value)
                 else:
