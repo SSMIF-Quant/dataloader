@@ -47,10 +47,6 @@ class DataLoader:
         params = {}
         if filters:
             for key, value in filters.items():
-                if key == "start":
-                    query += f" AND date >= %({key})s"
-                elif key == "end":
-                    query += f" AND date <= %({key})s"
                 if isinstance(value, list):
                     params[key] = tuple(value)
                 else:
@@ -83,7 +79,9 @@ class DataLoader:
             for sym, group in df.groupby("symbol"):
                 group = group.drop(columns="symbol")
                 group = group.rename(
-                    columns=lambda c: f"{sym}_{c}" if c != "Date" else c    # pylint: disable=W0640
+                    columns=lambda c: (
+                        f"{sym}_{c}" if c != "Date" else c
+                    )  # pylint: disable=W0640
                 )
                 renamed_frames.append(group)
 
@@ -119,6 +117,10 @@ class DataLoader:
 
         if filters:
             for key, value in filters.items():
+                if key == "start":
+                    query += f" AND date >= %({key})s"
+                elif key == "end":
+                    query += f" AND date <= %({key})s"
                 if isinstance(value, list):
                     query += f" AND {key} IN %({key})s"
                 else:
