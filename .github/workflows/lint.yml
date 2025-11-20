@@ -24,12 +24,12 @@ jobs:
 
       - name: Check formatting
         run: |
-          black clickhouse/ --check
+          black dataloader/ --check
 
       - name: Run linter
         run: |
-          pylint --fail-under=9.5 clickhouse/
+          pylint --fail-under=9.5 dataloader/
 
       - name: Type check
         run: |
-          mypy clickhouse/
+          mypy dataloader/
