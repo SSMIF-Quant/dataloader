@@ -49,7 +49,7 @@ dataloader/
 
 ## DataLoader Methods
 
-### `get_data()`
+### `query()`
 
 Fetch data from ClickHouse with flexible filtering and column selection.
 
@@ -63,13 +63,13 @@ Fetch data from ClickHouse with flexible filtering and column selection.
 
 **Returns:** `pd.DataFrame` with `Date` as index (sorted and deduplicated)
 
-### `show_tables()`
+### `tables()`
 
 List all available tables in the database.
 
 **Returns:** `List[str]` of table names
 
-### `show_table_column()`
+### `fields()`
 
 Get all columns for a specific table.
 
@@ -86,7 +86,7 @@ Get all columns for a specific table.
 from dataloader import DataLoader
 
 # Get all income statement columns for Apple
-equities_data = DataLoader.get_data(
+equities_data = DataLoader.query(
     source="equities",
     column_pattern=["IS_*"],  # All columns starting with "IS_"
     filters={"symbol": "AAPL"}
@@ -101,7 +101,7 @@ print(equities_data.head())
 from dataloader import DataLoader
 
 # Get specific macro indicators
-macro_data = DataLoader.get_data(
+macro_data = DataLoader.query(
     source="macro",
     columns_list=["XLB", "THREEFYTP10", "DSWP10", "DGS10", "BAMLEMHBHYCRPIOAS", "T10Y2Y"]
 )
@@ -115,7 +115,7 @@ print(macro_data.info())
 from dataloader import DataLoader
 
 # Get data for multiple symbols with limit
-multi_symbol_data = DataLoader.get_data(
+multi_symbol_data = DataLoader.query(
     source="equities",
     columns_list=["PX_LAST", "CUR_MKT_CAP", "PX_VOLUME"],
     filters={
@@ -133,14 +133,14 @@ print(multi_symbol_data)
 from dataloader import DataLoader
 
 # List all available tables
-tables = DataLoader.show_tables()
+tables = DataLoader.tables()
 print("Available tables:", tables)
 
 # Get columns for a specific table
-equity_columns = DataLoader.show_table_column("equities")
+equity_columns = DataLoader.fields("equities")
 print("Equity columns:", equity_columns)
 
-macro_columns = DataLoader.show_table_column("macro")
+macro_columns = DataLoader.fields("macro")
 print("Macro columns:", macro_columns)
 ```
 
@@ -150,7 +150,7 @@ print("Macro columns:", macro_columns)
 from dataloader import DataLoader
 
 # Mix explicit columns and patterns
-combined_data = DataLoader.get_data(
+combined_data = DataLoader.query(
     source="equities",
     columns_list=["PX_LAST"],  # Explicit columns
     column_pattern=["IS_*", "BS_*"],  # Income Statement + Balance Sheet columns
@@ -166,7 +166,7 @@ print(combined_data.columns.tolist())
 from dataloader import DataLoader
 
 # Get data in chunks
-page_1 = DataLoader.get_data(
+page_1 = DataLoader.query(
     source="equities",
     columns_list=["PX_LAST"],
     filters={"symbol": "AAPL"},
@@ -174,7 +174,7 @@ page_1 = DataLoader.get_data(
     offset=0
 )
 
-page_2 = DataLoader.get_data(
+page_2 = DataLoader.query(
     source="equities",
     columns_list=["PX_LAST"],
     filters={"symbol": "AAPL"},
