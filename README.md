@@ -80,6 +80,17 @@ Get all columns for a specific table.
 
 ## Usage Examples
 
+### Important Note
+
+To access different databases from the dataloader, simply supply the database name with the table name in ``source``, i.e to access data from the ``fred`` database:
+
+```python
+DataLoader.query(
+    source="fred.A074RC1Q027SBEA", # Make note of the syntax: <db_name>.<table_name>
+    limit=10000,
+)
+```
+
 ### Example 1: Load Equity Data with Column Patterns
 
 ```python
