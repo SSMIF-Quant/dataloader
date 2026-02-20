@@ -20,7 +20,7 @@ class DataLoader:
         - table/view aliasing
     """
 
-    database: ClassVar[str] = "ssmif_quant"
+    database: ClassVar[str] = "default"
     client: ClassVar[Client] = Manager.get_connection()
 
     @classmethod

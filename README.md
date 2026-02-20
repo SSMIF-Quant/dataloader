@@ -220,7 +220,7 @@ All queries return a `pandas.DataFrame` with:
 - The columns are renamed for clarity when filtering by a single symbol
 - Dates are converted to pandas datetime objects
 - Results are always sorted by date
-- The default database is `ssmif_quant`
+- The default database is `default`
 - Connection credentials are managed via environment variables
 
 ## Support
