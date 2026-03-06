@@ -44,6 +44,8 @@ class DataLoader:
             source, columns_list, column_pattern, filters, limit, offset
         )
 
+        print(query)
+
         params = {}
         if filters:
             for key, value in filters.items():
