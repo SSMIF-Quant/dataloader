@@ -40,6 +40,7 @@ class DataLoader:
             1. view (materialized)
             2. base table
         """
+        print(f"source={source}, cols={columns_list}, column_pattern={column_pattern}, filters={filters}, limit={limit}, offset={offset}")
         query = cls._build_query(
             source, columns_list, column_pattern, filters, limit, offset
         )
