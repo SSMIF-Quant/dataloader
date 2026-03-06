@@ -55,6 +55,9 @@ class DataLoader:
                     params[key] = value
 
         df = cls.client.query(query, params)
+
+        print(df.head())
+
         return cls._format_dataframe(df)
 
     @staticmethod
