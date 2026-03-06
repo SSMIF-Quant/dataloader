@@ -69,20 +69,19 @@ class DataLoader:
         """
         if "date" in df.columns:
             df["date"] = pd.to_datetime(df["date"])
-            df = df.rename(columns={"date": "Date"})
 
         if "symbol" in df.columns:
-            df = df.sort_values(["symbol", "Date"]).drop_duplicates(
-                subset=["symbol", "Date"]
+            df = df.sort_values(["symbol", "date"]).drop_duplicates(
+                subset=["symbol", "date"]
             )
-            df.set_index("Date", inplace=True)
+            df.set_index("date", inplace=True)
 
             renamed_frames = []
             for sym, group in df.groupby("symbol"):
                 group = group.drop(columns="symbol")
                 group = group.rename(
                     columns=lambda c: (
-                        f"{sym}_{c}" if c != "Date" else c
+                        f"{sym}_{c}" if c != "date" else c
                     )  # pylint: disable=W0640
                 )
                 renamed_frames.append(group)
@@ -90,8 +89,8 @@ class DataLoader:
             df = pd.concat(renamed_frames, axis=1).sort_index()
 
         else:
-            df = df.sort_values("Date").drop_duplicates(subset=["Date"])
-            df.set_index("Date", inplace=True)
+            df = df.sort_values("date").drop_duplicates(subset=["date"])
+            df.set_index("date", inplace=True)
 
         return df
 
