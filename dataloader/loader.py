@@ -44,7 +44,6 @@ class DataLoader:
             source, columns_list, column_pattern, filters, limit, offset
         )
 
-        print(f"query={query}")
         params = {}
         if filters:
             for key, value in filters.items():
@@ -53,6 +52,7 @@ class DataLoader:
                 else:
                     params[key] = value
 
+        print(f"query={query}, params={params}")
         df = cls.client.query(query, params)
         return cls._format_dataframe(df)
 
