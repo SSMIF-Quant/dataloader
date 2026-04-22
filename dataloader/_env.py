@@ -22,6 +22,7 @@ def get_fred_key() -> str:
     fred_key = os.getenv("FRED_KEY")
     if not fred_key:
         raise EnvironmentError(
-            "Missing FRED_KEY in environment. Please set it in your .env file or system environment."
+            "Missing FRED_KEY in environment. " \
+            "Please set it in your .env file or system environment."
         )
     return fred_key
