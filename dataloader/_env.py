@@ -16,8 +16,9 @@ def get_dsn() -> str:
         )
     return dsn
 
+
 def get_fred_key() -> str:
-    """ Fetch the FRED Key from environment variables. """
+    """Fetch the FRED Key from environment variables."""
     fred_key = os.getenv("FRED_KEY")
     if not fred_key:
         raise EnvironmentError(

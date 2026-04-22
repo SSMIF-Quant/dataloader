@@ -35,22 +35,30 @@ class DataLoader:
         macro_tickers: List[str],
         equity_tickers: List[str],
         start_date: str,
-        end_date: str
+        end_date: str,
     ) -> Dict[str, pd.DataFrame]:
         try:
-            start = datetime.strptime(start_date, "%Y-%m-%d").date()        # For checking purposes
+            start = datetime.strptime(
+                start_date, "%Y-%m-%d"
+            ).date()  # For checking purposes
             end = datetime.strptime(end_date, "%Y-%m-%d").date()
         except ValueError as e:
-            raise ValueError(f"Invalid date format. Use YYYY-MM-DD. Got: {start_date}, {end_date}") from e
+            raise ValueError(
+                f"Invalid date format. Use YYYY-MM-DD. Got: {start_date}, {end_date}"
+            ) from e
 
         dfs = {}
         try:
-            dfs['macro'] = cls.alt_client.fetch_macro_data(macro_tickers, start_date, end_date)
-            dfs['equity'] = cls.alt_client.fetch_equity_data(equity_tickers, start_date, end_date)
+            dfs["macro"] = cls.alt_client.fetch_macro_data(
+                macro_tickers, start_date, end_date
+            )
+            dfs["equity"] = cls.alt_client.fetch_equity_data(
+                equity_tickers, start_date, end_date
+            )
         except MacroDataFetchError as e:
             raise
         except EquityDataFetchError as e:
-            raise  
+            raise
 
         return dfs
 

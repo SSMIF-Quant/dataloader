@@ -10,23 +10,20 @@ import time
 
 from ._exception import MacroDataFetchError, EquityDataFetchError
 
-warnings.filterwarnings('ignore')       # Ignore yfinance warnings
+warnings.filterwarnings("ignore")  # Ignore yfinance warnings
+
 
 @define
 class Fred_Yf_Client:
     """
-    Client for fetching macro data from fred and equity data from yfinance. 
+    Client for fetching macro data from fred and equity data from yfinance.
     """
+
     _FRED_KEY: str
     _FRED_BASE: ClassVar[str] = "https://api.stlouisfed.org/fred/series/observations"
 
-    def fred_fn(
-        self, 
-        series_id: str, 
-        start: str, 
-        end: str
-    ) -> pd.Series:
-        
+    def fred_fn(self, series_id: str, start: str, end: str) -> pd.Series:
+
         params = {
             "api_key": self._FRED_KEY,
             "series_id": series_id,
@@ -46,18 +43,17 @@ class Fred_Yf_Client:
             raise MacroDataFetchError(f"No observations for FRED series {series_id}")
 
         idx = [pd.to_datetime(obs["date"]) for obs in observations]
-        vals = [float(obs["value"]) if obs["value"] != "." else np.nan for obs in observations]
+        vals = [
+            float(obs["value"]) if obs["value"] != "." else np.nan
+            for obs in observations
+        ]
 
         return pd.Series(vals, index=idx, name=series_id)
 
-
     def fetch_macro_data(
-        self, 
-        macro_tickers: List[str], 
-        start: str, 
-        end: str
+        self, macro_tickers: List[str], start: str, end: str
     ) -> pd.DataFrame:
-        
+
         raw_macro: Dict[str, pd.Series] = {}
 
         for ticker in macro_tickers:
@@ -71,22 +67,18 @@ class Fred_Yf_Client:
             time.sleep(0.25)
 
         return pd.DataFrame(raw_macro).sort_index().dropna(how="all")
-    
+
     def fetch_equity_data(
-        self, 
-        equity_tickers: List[str], 
-        start: str, 
-        end: str, 
-        adj_close: bool = True
+        self, equity_tickers: List[str], start: str, end: str, adj_close: bool = True
     ) -> pd.DataFrame:
-        
+
         try:
             data = yf.download(
                 equity_tickers,
                 start=start,
                 end=end,
                 auto_adjust=adj_close,
-                progress=False
+                progress=False,
             )
             return data
         except Exception as e:
