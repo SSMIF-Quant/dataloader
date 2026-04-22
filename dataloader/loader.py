@@ -4,15 +4,20 @@ from typing import Any, Dict, List, Optional, ClassVar
 
 import pandas as pd
 from attrs import define
+from datetime import datetime
 
 from ._manager import Manager
 from ._client import Client
+from ._exception import MacroDataFetchError, EquityDataFetchError
+from ._fred_yf_client import Fred_Yf_Client
 
 
 @define
 class DataLoader:
     """
     A unified data loader for ClickHouse tables and materialized views.
+
+    Also supports data fetching via FRED API and Yahoo Finance
 
     Supports:
         - dynamic column selection
@@ -22,6 +27,32 @@ class DataLoader:
 
     database: ClassVar[str] = "ssmif_quant"
     client: ClassVar[Client] = Manager.get_connection()
+    alt_client: ClassVar[Fred_Yf_Client] = Manager.get_alt_connection()
+
+    @classmethod
+    def query_fred_yf(
+        cls,
+        macro_tickers: List[str],
+        equity_tickers: List[str],
+        start_date: str,
+        end_date: str
+    ) -> Dict[str, pd.DataFrame]:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()        # For checking purposes
+            end = datetime.strptime(end_date, "%Y-%m-%d").date()
+        except ValueError as e:
+            raise ValueError(f"Invalid date format. Use YYYY-MM-DD. Got: {start_date}, {end_date}") from e
+
+        dfs = {}
+        try:
+            dfs['macro'] = cls.alt_client.fetch_macro_data(macro_tickers, start_date, end_date)
+            dfs['equity'] = cls.alt_client.fetch_equity_data(equity_tickers, start_date, end_date)
+        except MacroDataFetchError as e:
+            raise
+        except EquityDataFetchError as e:
+            raise  
+
+        return dfs
 
     @classmethod
     def query(

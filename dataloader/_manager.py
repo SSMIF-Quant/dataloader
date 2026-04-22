@@ -5,7 +5,8 @@ from typing import ClassVar, Optional
 
 from attrs import define
 from ._client import Client
-from ._env import get_dsn
+from ._fred_yf_client import Fred_Yf_Client
+from ._env import get_dsn, get_fred_key
 
 
 @define
@@ -40,3 +41,7 @@ class Manager:
         if cls._instance:
             cls._instance.close()
             cls._instance = None
+
+    @classmethod
+    def get_alt_connection(cls):
+        return Fred_Yf_Client(get_fred_key())
