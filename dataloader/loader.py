@@ -1,18 +1,22 @@
 """Clickhouse data loader"""
 
-from typing import Any, Dict, List, Optional, ClassVar
+from datetime import datetime
+from typing import Any, ClassVar, Dict, List, Optional
 
 import pandas as pd
 from attrs import define
 
 from ._manager import Manager
 from ._client import Client
+from ._fred_yf_client import FredYfClient
 
 
 @define
 class DataLoader:
     """
     A unified data loader for ClickHouse tables and materialized views.
+
+    Also supports data fetching via FRED API and Yahoo Finance
 
     Supports:
         - dynamic column selection
@@ -22,6 +26,34 @@ class DataLoader:
 
     database: ClassVar[str] = "ssmif_quant"
     client: ClassVar[Client] = Manager.get_connection()
+    alt_client: ClassVar[FredYfClient] = Manager.get_alt_connection()
+
+    @classmethod
+    def query_fred_yf(
+        cls,
+        macro_tickers: List[str],
+        equity_tickers: List[str],
+        start_date: str,
+        end_date: str,
+    ) -> Dict[str, pd.DataFrame]:
+        """Fetch macro data from FRED and equity data from yfinance."""
+        try:
+            datetime.strptime(start_date, "%Y-%m-%d")
+            datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid date format. Use YYYY-MM-DD. Got: {start_date}, {end_date}"
+            ) from e
+
+        dfs = {}
+        dfs["macro"] = cls.alt_client.fetch_macro_data(
+            macro_tickers, start_date, end_date
+        )
+        dfs["equity"] = cls.alt_client.fetch_equity_data(
+            equity_tickers, start_date, end_date
+        )
+
+        return dfs
 
     @classmethod
     def query(
